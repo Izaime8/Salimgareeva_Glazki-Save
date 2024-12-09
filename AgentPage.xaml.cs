@@ -20,6 +20,15 @@ namespace Salimgareeva_Glazki_Save
     /// </summary>
     public partial class AgentPage : Page
     {
+        int CountRecords;
+        int CountPage;
+        int CurrentPage;
+
+        List<Agent> CurrentPageList = new List<Agent>();
+        List<Agent> TableList;
+
+
+
         public AgentPage()
         {
             InitializeComponent();
@@ -36,10 +45,11 @@ namespace Salimgareeva_Glazki_Save
         {
             var currentAgents = Salimgareeva_GlazkiSaveEntities.GetContext().Agent.ToList();
 
-            if (Filter.SelectedIndex == 0)
-            {
-                AgentsListView.ItemsSource = currentAgents;
-            }
+            //if (Filter.SelectedIndex == 0)
+            //{
+            //    currentAgents = currentAgents;
+            //}
+
 
             if (Filter.SelectedIndex == 1)
             {
@@ -96,16 +106,105 @@ namespace Salimgareeva_Glazki_Save
             string SearchText = Search.Text;
             if (SearchText != null)
             {
-                currentAgents = currentAgents.Where(p => (p.Title.ToLower().Contains(SearchText.ToLower())) || p.Phone.Contains(SearchText.ToLower())).ToList(); /////////////////////////////////////////////////////////////////////////////////////////
+                currentAgents = currentAgents.Where(p => (p.Title.ToLower().Contains(SearchText.ToLower())) || p.PhoneDigits.ToLower().Contains(SearchText.ToLower()) || p.Email.ToLower().Contains(SearchText.ToLower())).ToList(); /////////////////////////////////////////////////////////////////////////////////////////
+            }
+
+            AgentsListView.ItemsSource = currentAgents;
+
+            TableList = currentAgents;
+            ChangePage(0, 0);
+        }
+
+
+        private void ChangePage(int direction, int? selectedPage)
+        {
+            CurrentPageList.Clear();
+            CountRecords = TableList.Count;
+
+            PagesNavigation.Visibility = CountRecords <= 10 ? Visibility.Hidden : Visibility.Visible;
+
+           
+            CountPage = CountRecords % 10 > 0 ? (CountRecords / 10 + 1) : (CountRecords / 10);
+
+
+            Boolean Ifupdate = true;
+            int min;
+            if (selectedPage.HasValue)
+            {
+                if (selectedPage >= 0 && selectedPage <= CountPage)
+                {
+                    CurrentPage = (int)selectedPage;
+                    min = CurrentPage * 10 + 10 < CountRecords ? CurrentPage * 10 + 10 : CountRecords;
+
+                    for (int i = CurrentPage * 10; i < min; i++)
+                    {
+                        CurrentPageList.Add(TableList[i]);
+                    }
+                }
+            }
+
+            else
+            {
+                switch (direction)
+                {
+                    case 1:
+                        if (CurrentPage > 0)
+                        {
+                            CurrentPage--;
+                            min = CurrentPage * 10 + 10 < CountRecords ? CurrentPage * 10 + 10 : CountRecords;
+                            for (int i = CurrentPage * 10; i < min; i++)
+                            {
+                                CurrentPageList.Add(TableList[i]);
+                            }
+                        }
+                        else {
+                            Ifupdate = false;
+                            }
+                        break;
+                    case 2:
+                        if (CurrentPage < CountPage - 1)
+                        {
+                            CurrentPage++;
+                            min = CurrentPage * 10 + 10 < CountRecords ? CurrentPage * 10 + 10 : CountRecords;
+                            for (int i = CurrentPage * 10; i < min; i++)
+                            {
+                                CurrentPageList.Add(TableList[i]);
+                            }
+                        }
+                        else
+                        {
+                            Ifupdate = false;
+                        }
+                        break;
+                }
+            }
+
+            if (Ifupdate)
+            {
+                PageListBox.Items.Clear();
+
+                for (int i = 1; i <= CountPage; i++)
+                {
+                    PageListBox.Items.Add(i);
+                }
+                PageListBox.SelectedIndex = CurrentPage;
+
+
+                min = CurrentPage * 10 + 10 < CountRecords ? CurrentPage * 10 + 10 : CountRecords;
+                TBCount.Text = min.ToString();
+                TBAllRecords.Text = " из " + CountRecords.ToString();
+
+
+
+
+                AgentsListView.ItemsSource = CurrentPageList;
+
+                AgentsListView.Items.Refresh();
             }
 
 
-
-
-            AgentsListView.ItemsSource = currentAgents.ToList();
- 
-
         }
+
 
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -128,5 +227,21 @@ namespace Salimgareeva_Glazki_Save
         {
             UpdateAgents();
         }
+
+        private void LeftDirButton_Click(object sender, RoutedEventArgs e)
+        {
+            ChangePage(1, null);
+        }
+
+        private void RightDirButton_Click(object sender, RoutedEventArgs e)
+        {
+            ChangePage(2, null);
+        }
+
+        private void PageListBox_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            ChangePage(0, Convert.ToInt32(PageListBox.SelectedItem.ToString()) - 1);
+        }
+
     }
 }

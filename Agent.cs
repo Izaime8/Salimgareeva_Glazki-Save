@@ -47,6 +47,24 @@ namespace Salimgareeva_Glazki_Save
         }
 
 
+        //////////////////////
+        public string PhoneDigits
+        {
+            get
+            {
+                string temp = "";
+                for (int i = 0; i < this.Phone.Length; i++)
+                {
+                    if (Phone[i] >= '0' && Phone[i] <= '9' || Phone[i] == '+')
+                    {
+                        temp += Phone[i];
+                    }
+                }
+                return temp;
+            }
+        }
+
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<AgentPriorityHistory> AgentPriorityHistory { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
