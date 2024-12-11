@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:Salimgareeva_Glazki_Save"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="AgentPage" FontFamily="Century Gothic">
+      Title="AgentPage" FontFamily="Century Gothic" IsVisibleChanged="Page_IsVisibleChanged">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -45,6 +45,7 @@
             <TextBlock>ПАО</TextBlock>
         </ComboBox>
 
+        <Button Content="Добавить" Grid.Column="0" Grid.Row="5" Name="AddButton" HorizontalAlignment="Center" Click="AddButton_Click"></Button>
 
 
         <ListView Name="AgentsListView" Grid.Row="1" Grid.ColumnSpan="4">
@@ -60,6 +61,7 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal"  Height="30">
                             <TextBlock Text="{Binding AgentTypeString}" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Bottom"></TextBlock>
@@ -71,10 +73,10 @@
                         <TextBlock Text="Продаж за год" Grid.Column="1" Grid.Row="1" FontSize="14" HorizontalAlignment="Left"></TextBlock>
                         <TextBlock Text="{Binding Phone}" Grid.Column="1" Grid.Row="2" FontSize="14" HorizontalAlignment="Left"></TextBlock>
 
-                        <!--<TextBlock Text="{Binding PhoneDigits}" Grid.Column="1" Grid.Row="2" FontSize="14" TextAlignment="Center"></TextBlock>-->
 
                         <TextBlock Text="{Binding Priority, StringFormat={}Приоритетность: {0:0}}" Grid.Column="1" Grid.Row="3" FontSize="14" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" ></TextBlock>
 
+                       
                         <Image Height="150" Grid.Column="0" Grid.RowSpan="4" Stretch="Uniform" HorizontalAlignment="Center">
                             <Image.Source>
                                 <Binding Path="Logo">
@@ -87,6 +89,8 @@
                             </Image.Source>
                         </Image>
 
+                        <Button Content="Изменить" Grid.Column="1" Grid.Row="5" Name="EditButton" HorizontalAlignment="Center" Click="EditButton_Click"></Button>
+                        
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

@@ -115,6 +115,10 @@ namespace Salimgareeva_Glazki_Save
             ChangePage(0, 0);
         }
 
+        private int Min()
+        {
+            return CurrentPage * 10 + 10 < CountRecords ? CurrentPage * 10 + 10 : CountRecords;
+        }
 
         private void ChangePage(int direction, int? selectedPage)
         {
@@ -123,26 +127,20 @@ namespace Salimgareeva_Glazki_Save
 
             PagesNavigation.Visibility = CountRecords <= 10 ? Visibility.Hidden : Visibility.Visible;
 
-           
             CountPage = CountRecords % 10 > 0 ? (CountRecords / 10 + 1) : (CountRecords / 10);
 
-
             Boolean Ifupdate = true;
-            int min;
             if (selectedPage.HasValue)
             {
                 if (selectedPage >= 0 && selectedPage <= CountPage)
                 {
                     CurrentPage = (int)selectedPage;
-                    min = CurrentPage * 10 + 10 < CountRecords ? CurrentPage * 10 + 10 : CountRecords;
-
-                    for (int i = CurrentPage * 10; i < min; i++)
+                    for (int i = CurrentPage * 10; i < Min(); i++)
                     {
                         CurrentPageList.Add(TableList[i]);
                     }
                 }
             }
-
             else
             {
                 switch (direction)
@@ -151,22 +149,21 @@ namespace Salimgareeva_Glazki_Save
                         if (CurrentPage > 0)
                         {
                             CurrentPage--;
-                            min = CurrentPage * 10 + 10 < CountRecords ? CurrentPage * 10 + 10 : CountRecords;
-                            for (int i = CurrentPage * 10; i < min; i++)
+                            for (int i = CurrentPage * 10; i < Min(); i++)
                             {
                                 CurrentPageList.Add(TableList[i]);
                             }
                         }
-                        else {
+                        else
+                        {
                             Ifupdate = false;
-                            }
+                        }
                         break;
                     case 2:
                         if (CurrentPage < CountPage - 1)
                         {
                             CurrentPage++;
-                            min = CurrentPage * 10 + 10 < CountRecords ? CurrentPage * 10 + 10 : CountRecords;
-                            for (int i = CurrentPage * 10; i < min; i++)
+                            for (int i = CurrentPage * 10; i < Min(); i++)
                             {
                                 CurrentPageList.Add(TableList[i]);
                             }
@@ -189,30 +186,21 @@ namespace Salimgareeva_Glazki_Save
                 }
                 PageListBox.SelectedIndex = CurrentPage;
 
-
-                min = CurrentPage * 10 + 10 < CountRecords ? CurrentPage * 10 + 10 : CountRecords;
-                TBCount.Text = min.ToString();
+                TBCount.Text = Min().ToString();
                 TBAllRecords.Text = " из " + CountRecords.ToString();
-
-
-
-
                 AgentsListView.ItemsSource = CurrentPageList;
-
                 AgentsListView.Items.Refresh();
             }
-
-
         }
 
 
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Manager.MainFrame.Navigate(new AddEditPage());
+            Manager.MainFrame.Navigate(new AddEditPage(null));
         }
 
-        
+
         private void Filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateAgents();
@@ -243,5 +231,27 @@ namespace Salimgareeva_Glazki_Save
             ChangePage(0, Convert.ToInt32(PageListBox.SelectedItem.ToString()) - 1);
         }
 
+        private void EditButton_Click(object sender, RoutedEventArgs e)
+        {
+            Manager.MainFrame.Navigate(new AddEditPage((sender as Button).DataContext as Agent));
+        }
+
+        private void Page_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+
+            if (Visibility == Visibility.Visible)
+            {
+                Salimgareeva_GlazkiSaveEntities.GetContext().ChangeTracker.Entries().ToList().ForEach(p => p.Reload());
+                AgentsListView.ItemsSource = Salimgareeva_GlazkiSaveEntities.GetContext().Agent.ToList();
+                UpdateAgents();
+            }
+        }
+
+        private void AddButton_Click(object sender, RoutedEventArgs e)
+        {
+            Manager.MainFrame.Navigate(new AddEditPage(null));
+
+        }
     }
 }
+

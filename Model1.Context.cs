@@ -16,9 +16,10 @@ namespace Salimgareeva_Glazki_Save
     public partial class Salimgareeva_GlazkiSaveEntities : DbContext
     {
         private static Salimgareeva_GlazkiSaveEntities _context;
+
         public static Salimgareeva_GlazkiSaveEntities GetContext()
         {
-            if(_context == null)
+            if (_context == null)
                 _context = new Salimgareeva_GlazkiSaveEntities();
             return _context;
         }

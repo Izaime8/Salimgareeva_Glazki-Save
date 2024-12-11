@@ -33,21 +33,16 @@ namespace Salimgareeva_Glazki_Save
         public string DirectorName { get; set; }
         public string INN { get; set; }
         public string KPP { get; set; }
-
-
-
+    
         public virtual AgentType AgentType { get; set; }
 
         public string AgentTypeString
         {
             get
             {
-                return AgentType.Title.ToString();
+                return AgentType.Title;
             }
         }
-
-
-        //////////////////////
         public string PhoneDigits
         {
             get
@@ -63,6 +58,8 @@ namespace Salimgareeva_Glazki_Save
                 return temp;
             }
         }
+
+
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
