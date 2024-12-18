@@ -85,13 +85,13 @@ namespace Salimgareeva_Glazki_Save
             {
                 currentAgents = currentAgents.OrderByDescending(p => p.Title).ToList();
             }
-            if (Sort.SelectedIndex == 3) ///////////////////////////////////////////////
+            if (Sort.SelectedIndex == 3) 
             {
-                currentAgents = currentAgents.OrderBy(p => p.Title).ToList();
+                currentAgents = currentAgents.OrderBy(p => p.Discount).ToList();
             }
-            if (Sort.SelectedIndex == 4)///////////////////////////////////////////////
+            if (Sort.SelectedIndex == 4)
             {
-                currentAgents = currentAgents.OrderBy(p => p.Title).ToList();
+                currentAgents = currentAgents.OrderByDescending(p => p.Discount).ToList();
             }
             if (Sort.SelectedIndex == 5)
             {
@@ -195,10 +195,10 @@ namespace Salimgareeva_Glazki_Save
 
 
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            Manager.MainFrame.Navigate(new AddEditPage(null));
-        }
+        //private void Button_Click(object sender, RoutedEventArgs e)
+        //{
+        //    Manager.MainFrame.Navigate(new AddEditPage(null));
+        //}
 
 
         private void Filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -251,6 +251,46 @@ namespace Salimgareeva_Glazki_Save
         {
             Manager.MainFrame.Navigate(new AddEditPage(null));
 
+        }
+
+        private void AgentsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (AgentsListView.SelectedItems.Count > 1)
+            {
+                ChangePriorityButton.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                ChangePriorityButton.Visibility = Visibility.Hidden;
+            }
+        }
+
+        private void ChangePriorityButton_Click(object sender, RoutedEventArgs e)
+        {
+            int maxPriority = 0;
+            foreach (Agent agent in AgentsListView.SelectedItems)
+            {
+                if (agent.Priority > maxPriority)
+                    maxPriority = agent.Priority;
+            }
+            ChangePriority changePriority = new ChangePriority(maxPriority);
+            changePriority.ShowDialog();
+
+            foreach (Agent agent in AgentsListView.SelectedItems)
+            {
+                agent.Priority = changePriority.NewPriority;
+            }
+            UpdateAgents();
+
+            try
+            {
+                Salimgareeva_GlazkiSaveEntities.GetContext().SaveChanges();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
+            }
         }
     }
 }

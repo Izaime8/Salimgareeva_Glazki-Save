@@ -11,7 +11,10 @@ namespace Salimgareeva_Glazki_Save
 {
     using System;
     using System.Collections.Generic;
-    
+    using System.Linq;
+    using System.Security.Cryptography;
+    using System.Windows.Media;
+
     public partial class Agent
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
@@ -21,7 +24,7 @@ namespace Salimgareeva_Glazki_Save
             this.ProductSale = new HashSet<ProductSale>();
             this.Shop = new HashSet<Shop>();
         }
-    
+
         public int ID { get; set; }
         public int AgentTypeID { get; set; }
         public string Title { get; set; }
@@ -33,16 +36,45 @@ namespace Salimgareeva_Glazki_Save
         public string DirectorName { get; set; }
         public string INN { get; set; }
         public string KPP { get; set; }
-    
+
         public virtual AgentType AgentType { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<AgentPriorityHistory> AgentPriorityHistory { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ProductSale> ProductSale { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Shop> Shop { get; set; }
 
         public string AgentTypeString
         {
             get
             {
-                return AgentType.Title;
+                return AgentType.Title.ToString();
             }
         }
+
+        public int AllSales
+        {
+            get
+            {
+                return ProductSale.Where(p => (p.AgentID == this.ID)).Count();
+            }
+        }
+
+        public decimal AllSalesCount
+        {
+            get
+            {
+                decimal temp = 0;
+                foreach (ProductSale prod in ProductSale)
+                {
+                    if (prod.AgentID == this.ID)
+                        temp += prod.SumOfSale;
+                }
+                return temp;
+            }
+        }
+
         public string PhoneDigits
         {
             get
@@ -50,23 +82,57 @@ namespace Salimgareeva_Glazki_Save
                 string temp = "";
                 for (int i = 0; i < this.Phone.Length; i++)
                 {
-                    if (Phone[i] >= '0' && Phone[i] <= '9' || Phone[i] == '+')
-                    {
-                        temp += Phone[i];
-                    }
+                    if (this.Phone[i] >= '0' && this.Phone[i] <= '9' || this.Phone[i] == '+')
+                        temp += this.Phone[i];
                 }
                 return temp;
             }
         }
 
+        public int Discount
+        {
+            get
+            {
+                if (this.AllSalesCount >= 0 && this.AllSalesCount <= 10 * 1000)
+                    return 0;
+                if (this.AllSalesCount >= 10 * 1000 && this.AllSalesCount <= 50 * 1000)
+                    return 5;
+                if (this.AllSalesCount >= 50 * 1000 && this.AllSalesCount <= 150 * 1000)
+                    return 10;
+                if (this.AllSalesCount >= 150 * 1000 && this.AllSalesCount <= 500 * 1000)
+                    return 20;
+                if (this.AllSalesCount >= 500 * 1000)
+                    return 25;
+                return 0;
+
+            }
+        }
+
+        public SolidColorBrush FontStyle
+        {
+            get
+            {
+                if (Discount >= 25)
+                {
+                    return (SolidColorBrush)new BrushConverter().ConvertFromString("LightGreen");
+                }
+                else
+                {
+                    return (SolidColorBrush)new BrushConverter().ConvertFromString("White");
+                }
+            }
+        }
 
 
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<AgentPriorityHistory> AgentPriorityHistory { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ProductSale> ProductSale { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Shop> Shop { get; set; }
+        //public List<ProductSale> HistoryOfSales
+        //{
+        //    get
+        //    {
+        //        List<ProductSale> tempList = new List<ProductSale>();
+        //        tempList = ProductSale.Where(p => this.ID == p.AgentID).ToList();
+        //        return tempList;
+        //    }
+        //}
     }
 }
+

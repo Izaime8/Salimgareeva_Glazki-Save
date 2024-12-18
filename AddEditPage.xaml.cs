@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,15 +14,28 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Salimgareeva_Glazki_Save
 {
     /// <summary>
     /// Логика взаимодействия для AddEditPage.xaml
     /// </summary>
+    /// 
+
+
     public partial class AddEditPage : Page
     {
+
+
+
         private Agent _currentAgent = new Agent();
+        private ProductSale _currentProductSale = new ProductSale();
+         /// <summary>
+         /// //////////////////////
+         /// </summary>
+
+
         public AddEditPage(Agent selectedAgent)
         {
             InitializeComponent();
@@ -32,9 +46,32 @@ namespace Salimgareeva_Glazki_Save
             {
                 _currentAgent = selectedAgent;
                 AgentTypeComboBox.SelectedIndex = _currentAgent.AgentTypeID - 1;
+                HistoryOfRealisationListView.Visibility = Visibility.Visible;
             }
+            else
+            {
+                HistoryOfRealisationListView.Visibility = Visibility.Hidden;
+            }
+            //
+            //ComboProductSaleTitle.SelectedIndex = 0;
+
+            var allProducts = Salimgareeva_GlazkiSaveEntities.GetContext().Product.ToList();
+
+            var currentProductSales = Salimgareeva_GlazkiSaveEntities.GetContext().ProductSale.ToList();
+            currentProductSales = currentProductSales.Where(p => p.AgentID == _currentAgent.ID).ToList();
+
+            HistoryOfRealisationListView.ItemsSource = currentProductSales;
+
+            ComboProductSaleTitle.ItemsSource = allProducts;
+
+
+            DataContext = _currentProductSale;
+
+            //DataContext = currentProductSales;
+            //DataContext = allProductSales;
 
             DataContext = _currentAgent;
+
 
         }
 
@@ -153,5 +190,79 @@ namespace Salimgareeva_Glazki_Save
                 }
             }
         }
+
+        private void AddProductSale_Click(object sender, RoutedEventArgs e) ////////////////////////////////////////////////////////////////////////////////////////////////
+        {
+            StringBuilder errors = new StringBuilder();
+            if (ComboProductSaleTitle.SelectedItem == null)
+                errors.AppendLine("Укажите продукт");
+            if (string.IsNullOrWhiteSpace(ProductCountTB.Text))
+                errors.AppendLine("Укажите количество продуктов");
+            bool isProductCountDigits = true;
+            for(int i = 0; i < ProductCountTB.Text.Length; i++)
+            {
+                if (ProductCountTB.Text[i] < '0' || ProductCountTB.Text[i] > '9')
+                {
+                    isProductCountDigits = false;
+                }
+            }
+            if (!isProductCountDigits)
+                errors.AppendLine("Укажите численное положительное продуктов");
+
+            if (string.IsNullOrWhiteSpace(SaleDateDatePicker.Text))
+                errors.AppendLine("Укажите дату продажи");
+
+            if (errors.Length > 0)
+            {
+                MessageBox.Show(errors.ToString());
+                return;
+            }
+            _currentProductSale.AgentID = _currentAgent.ID;
+            _currentProductSale.ProductID = ComboProductSaleTitle.SelectedIndex + 1;
+            _currentProductSale.ProductCount = Convert.ToInt32(ProductCountTB.Text);
+            _currentProductSale.SaleDate = Convert.ToDateTime(SaleDateDatePicker.Text);
+            if (_currentProductSale.ID == 0)
+                Salimgareeva_GlazkiSaveEntities.GetContext().ProductSale.Add(_currentProductSale);
+
+
+
+            try
+            {
+                Salimgareeva_GlazkiSaveEntities.GetContext().SaveChanges();
+                MessageBox.Show("информация сохранена");
+                Manager.MainFrame.GoBack();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
+            }
+        }
+
+        private void DeleteProductSale_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Вы точно хотите выполнить удаление?", "Внимание!", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    foreach (ProductSale history in HistoryOfRealisationListView.SelectedItems)
+                    {
+                        Salimgareeva_GlazkiSaveEntities.GetContext().ProductSale.Remove(history);
+
+                    }
+                    Salimgareeva_GlazkiSaveEntities.GetContext().SaveChanges();
+
+                    MessageBox.Show("Информация удалена!");
+                    Manager.MainFrame.GoBack();
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message.ToString());
+                }
+            }
+        }
+
+        
     }
 }
